@@ -15,15 +15,15 @@ class Term (models.Model):
 
 class Synonym (models.Model):
     label = models.CharField(max_length=256, unique=True)
-    term_id = models.ForeignKey(Term, on_delete=models.CASCADE)
+    term = models.ForeignKey(Term, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.label
+        return f'{self.label} === {self.term}'
 
 
 class Ontology (models.Model):
-    child_term_id = models.ForeignKey(Term, on_delete=models.CASCADE, related_name="child_term")
-    parent_term_id = models.ForeignKey(Term, on_delete=models.CASCADE, related_name="parent_term")
+    child_term = models.ForeignKey(Term, on_delete=models.CASCADE, related_name="child_term")
+    parent_term = models.ForeignKey(Term, on_delete=models.CASCADE, related_name="parent_term")
 
     def __str__(self):
-        return f'{self.parent_term_id} > {self.child_term_id}'
+        return f'{self.parent_term} > {self.child_term}'
