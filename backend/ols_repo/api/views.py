@@ -19,17 +19,21 @@ def home(request):
 @handle_server_errors
 def terms(request):
     if request.method == "GET":
+        # retrieving all terms
         all_terms = Term.objects.all()
+        # creating pagination
         paginator = Paginator(all_terms, 20)
         page_number = int(request.GET.get("page") or 1)
         page_obj = paginator.get_page(page_number)
         total_pages = paginator.num_pages
+
         return JsonResponse({
             "terms": [serialize_term(term) for term in page_obj],
             "pagination": {
                 "current": page_number if page_number <= total_pages else total_pages,
                 "pages": paginator.num_pages,
                 "size": 20,
+                "total": len(all_terms)
             }})
 
     elif request.method == "POST":
@@ -43,6 +47,7 @@ def terms(request):
         # storing term parents
         create_and_store_relationship(new_term, "parents", data, Term, "id", defaults={
                                       "label": "unknown", "description": "unset"})
+
         return JsonResponse({"new_term": serialize_term(new_term)})
 
     return HttpResponse('Method not allowed', status=405)
