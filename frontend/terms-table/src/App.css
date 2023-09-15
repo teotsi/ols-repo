@@ -1,11 +1,19 @@
 .App {
   display: flex;
   justify-content: center;
+  flex-direction: column;
 }
 
 .centered {
-  height: 50%;
-  width: 75vw;
   display: flex;
   justify-content: center;
+}
+
+.table-wrapper {
+  width: 75vw;
+}
+
+.centered-text {
+  color: #353b3b;
+  text-align: center;
 }
