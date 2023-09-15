@@ -8,6 +8,11 @@ from tqdm.asyncio import tqdm
 
 
 async def get_term_parents(session, url):
+    """
+    Fetcher function for term parents.
+    If the call initially fails due to load,
+    we retry after 5 seconds.
+    """
     fetched = False
     while not fetched:
         try:
@@ -20,12 +25,18 @@ async def get_term_parents(session, url):
 
 
 async def get_page(session, page_index):
+    """
+    Fetcher function for term pages.
+    """
     async with session.get(f"https://www.ebi.ac.uk/ols/api/ontologies/efo/terms?page={page_index}&size=500") as resp:
         page = await resp.json()
         return page
 
 
 async def create_term_task(term):
+    """
+    async function that creates Term models and their synonyms as needed.
+    """
     new_term = await Term.objects.acreate(  # creating and saving the new term
         label=term["label"], description="".join(term["description"]), id=term["short_form"])
     for synonym in term["synonyms"]:
@@ -38,6 +49,9 @@ async def create_term_task(term):
 
 
 async def create_ontology_task(term, parents, mapping):
+    """
+    async function that creates parent-child relationships.
+    """
     if parents:
         for parent in parents["_embedded"]["terms"]:
             try:
@@ -47,14 +61,19 @@ async def create_ontology_task(term, parents, mapping):
 
 
 async def get_none():
+    """
+    async function that does nothing. Used as a placeholder below.
+    """
     return None
 
 
 class Command(BaseCommand):
     help = "Fetches terms from OLS and populates the DB"
 
-    # just a wrapper for async tasks with a progress bar and messages
     async def run_with_log(self, label, tasks):
+        """
+        just a wrapper for async tasks with a progress bar and messages
+        """
         self.stdout.write(
             self.style.NOTICE(f'{label} start')
         )
@@ -88,6 +107,7 @@ class Command(BaseCommand):
 
         async def main():
             async with aiohttp.ClientSession() as session:
+
                 # fetching all pages
                 all_pages_tasks = [get_page(session, i)
                                    for i in range(total_pages)]
@@ -122,4 +142,4 @@ class Command(BaseCommand):
                 ]
                 await self.run_with_log("create ontology rels", create_all_ontologies_tasks)
 
-        asyncio.run(main())
+        asyncio.run(main())  # our entry point

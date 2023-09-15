@@ -1,6 +1,5 @@
 import json
 from django.core.paginator import Paginator
-from django.forms.models import model_to_dict
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.csrf import csrf_protect
@@ -10,14 +9,13 @@ from .helpers import handle_server_errors, serialize_term, create_and_store_rela
 # Create your views here.
 
 
-def home(request):
-    return HttpResponse('done')
-
-
 @csrf_protect
 @csrf_exempt
 @handle_server_errors
 def terms(request):
+    """
+    View handler for /terms.
+    """
     if request.method == "GET":
         # retrieving all terms
         all_terms = Term.objects.all()
@@ -57,6 +55,9 @@ def terms(request):
 @csrf_exempt
 @handle_server_errors
 def term(request, id):
+    """
+    View handler for /terms/<id>.
+    """
     if request.method == "GET":
 
         term = Term.objects.get(id=id)
@@ -66,6 +67,7 @@ def term(request, id):
         data = json.loads(request.body)
         Term.objects.filter(id=id).update(
             label=data["label"], description=data["description"])
+
         updated_term = Term.objects.get(id=id)
         # storing term synonyms
         create_and_store_relationship(
@@ -78,3 +80,5 @@ def term(request, id):
     elif request.method == "DELETE":
         Term.objects.filter(id=id).delete()
         return JsonResponse({"deleted": True})
+
+    return HttpResponse('Method not allowed', status=405)
