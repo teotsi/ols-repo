@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { DOMAIN } from "../config";
+import { formatTermData } from "../helpers/formatting";
 
 /**
  * Hook that fetches terms by page, and stores pagination data for our table
@@ -24,7 +25,7 @@ const useTerms = () => {
       }
     );
     const data = await response.json();
-    setData(data.terms);
+    setData(formatTermData(data.terms));
     setFetching(false);
     const { current, total, size: pageSize } = data.pagination;
     setPageData({ current, total, pageSize });
