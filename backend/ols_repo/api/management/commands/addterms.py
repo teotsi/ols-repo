@@ -1,4 +1,4 @@
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 import requests
 from api.models import Term, Synonym
 import aiohttp
@@ -43,7 +43,6 @@ async def create_ontology_task(term, parents, mapping):
             try:
                 new_ontology_relationship = await term.parents.aadd(mapping[parent["short_form"]])
             except Exception as e:
-                print(e)
                 pass
 
 
@@ -54,6 +53,7 @@ async def get_none():
 class Command(BaseCommand):
     help = "Fetches terms from OLS and populates the DB"
 
+    # just a wrapper for async tasks with a progress bar and messages
     async def run_with_log(self, label, tasks):
         self.stdout.write(
             self.style.NOTICE(f'{label} start')
@@ -73,12 +73,14 @@ class Command(BaseCommand):
         Term.objects.all().delete()
         Synonym.objects.all().delete()
 
+        # fetching this only to get pagination data
         initial_data_request = requests.get(
             "https://www.ebi.ac.uk/ols/api/ontologies/efo/terms")
         initial_data = initial_data_request.json()
 
         pagination_data = initial_data["page"]
         total_items = upper_limit or pagination_data["totalElements"]
+        # 500 is the upper limit for items per page on the API
         total_pages = total_items // 500 + 1
         last_page_remainder = total_items % 500
         if last_page_remainder == 0:
@@ -110,7 +112,7 @@ class Command(BaseCommand):
 
                 # creating all new terms and synonyms
                 create_all_terms_tasks = [
-                    create_term_task(term) for term in all_terms]
+                    create_term_task(term) for term in all_terms[:total_items]]
                 created_terms = await self.run_with_log("Save terms and synonyms", create_all_terms_tasks)
                 terms_mapping = {term.id: term for term in created_terms}
 
