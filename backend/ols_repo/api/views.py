@@ -21,10 +21,16 @@ def terms(request):
     if request.method == "GET":
         all_terms = Term.objects.all()
         paginator = Paginator(all_terms, 20)
-        page_number = request.GET.get("page")
-        page_obj = paginator.get_page(page_number or 0)
-        print(paginator.num_pages)
-        return JsonResponse({"terms": [serialize_term(term) for term in page_obj]})
+        page_number = int(request.GET.get("page") or 1)
+        page_obj = paginator.get_page(page_number)
+        total_pages = paginator.num_pages
+        return JsonResponse({
+            "terms": [serialize_term(term) for term in page_obj],
+            "pagination": {
+                "current": page_number if page_number <= total_pages else total_pages,
+                "pages": paginator.num_pages,
+                "size": 20,
+            }})
 
     elif request.method == "POST":
         data = json.loads(request.body)
