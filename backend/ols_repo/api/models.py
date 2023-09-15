@@ -16,6 +16,6 @@ class Term (models.Model):
     id = models.CharField(
         max_length=32, default=f'FAKE_{randint(0, 9999999)}', primary_key=True)
     synonyms = models.ManyToManyField(Synonym)
-    parents = models.ManyToManyField("self")
+    parents = models.ManyToManyField("self", symmetrical=False, related_name="children")
     def __str__(self):
         return self.label

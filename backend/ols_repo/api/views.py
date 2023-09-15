@@ -34,7 +34,7 @@ def terms(request):
         # storing term synonyms
         create_and_store_relationship(
             new_term, "synonyms", data, Synonym, "label")
-        # storing parent rels
+        # storing term parents
         create_and_store_relationship(new_term, "parents", data, Term, "id", defaults={
                                       "label": "unknown", "description": "unset"})
         return JsonResponse({"new_term": serialize_term(new_term)})
@@ -56,7 +56,13 @@ def term(request, id):
         Term.objects.filter(id=id).update(
             label=data["label"], description=data["description"])
         updated_term = Term.objects.get(id=id)
-        return JsonResponse({"updated_term": model_to_dict(updated_term)})
+        # storing term synonyms
+        create_and_store_relationship(
+            updated_term, "synonyms", data, Synonym, "label")
+        # storing term parents
+        create_and_store_relationship(updated_term, "parents", data, Term, "id", defaults={
+                                      "label": "unknown", "description": "unset"})
+        return JsonResponse({"updated_term": serialize_term(updated_term)})
 
     elif request.method == "DELETE":
         Term.objects.filter(id=id).delete()
