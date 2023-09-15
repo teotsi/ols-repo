@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 import requests
-from api.models import Term, Synonym, SynonymAndTerm, Ontology
+from api.models import Term, Synonym
 import aiohttp
 import asyncio
 from aiohttp.client_exceptions import ServerDisconnectedError
@@ -16,7 +16,7 @@ async def get_term_parents(session, url):
                 page = await resp.json()
                 return page
         except ServerDisconnectedError:
-            await asyncio.sleep(10)
+            await asyncio.sleep(5)
 
 
 async def get_page(session, page_index):
@@ -30,9 +30,8 @@ async def create_term_task(term):
         label=term["label"], description="".join(term["description"]), id=term["short_form"])
     for synonym in term["synonyms"]:
         try:
-            new_synonym = await Synonym.objects.acreate(  # creating and saving each synonym
+            new_synonym = await new_term.synonyms.acreate(  # creating and saving each synonym
                 label=synonym)
-            new_synonym_term_relationship = await SynonymAndTerm.objects.acreate(synonym=new_synonym, term=new_term)
         except:
             pass
     return new_term
@@ -42,9 +41,9 @@ async def create_ontology_task(term, parents, mapping):
     if parents:
         for parent in parents["_embedded"]["terms"]:
             try:
-                new_ontology_relationship = await Ontology.objects.acreate(
-                    child_term=term, parent_term=mapping[parent["short_form"]])
-            except:
+                new_ontology_relationship = await term.parents.aadd(mapping[parent["short_form"]])
+            except Exception as e:
+                print(e)
                 pass
 
 
