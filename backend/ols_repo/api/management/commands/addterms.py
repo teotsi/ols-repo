@@ -33,8 +33,8 @@ async def create_term_task(term):
             new_synonym = await Synonym.objects.acreate(  # creating and saving each synonym
                 label=synonym)
             new_synonym_term_relationship = await SynonymAndTerm.objects.acreate(synonym=new_synonym, term=new_term)
-        except Exception as e:
-            print(e)
+        except:
+            pass
     return new_term
 
 
@@ -43,9 +43,10 @@ async def create_ontology_task(term, parents, mapping):
         for parent in parents["_embedded"]["terms"]:
             try:
                 new_ontology_relationship = await Ontology.objects.acreate(
-                child_term=term, parent_term=mapping[parent["short_form"]])
+                    child_term=term, parent_term=mapping[parent["short_form"]])
             except:
                 pass
+
 
 async def get_none():
     return None
@@ -53,6 +54,16 @@ async def get_none():
 
 class Command(BaseCommand):
     help = "Fetches terms from OLS and populates the DB"
+
+    async def run_with_log(self, label, tasks):
+        self.stdout.write(
+            self.style.NOTICE(f'{label} start')
+        )
+        completed_tasks = await tqdm.gather(*tasks)
+        self.stdout.write(
+            self.style.SUCCESS(f'{label} success')
+        )
+        return completed_tasks
 
     def add_arguments(self, parser):
         # Positional arguments
@@ -76,32 +87,38 @@ class Command(BaseCommand):
 
         async def main():
             async with aiohttp.ClientSession() as session:
+                # fetching all pages
                 all_pages_tasks = [get_page(session, i)
                                    for i in range(total_pages)]
-                # fetching all pages
-                all_pages = await tqdm.gather(*all_pages_tasks)
+                all_pages = await self.run_with_log("pages", all_pages_tasks)
+
                 all_terms = [
                     term for page in all_pages for term in page["_embedded"]["terms"]]  # creating a list of all fetched terms
 
+                # fetching all parents
                 all_parents_tasks = []
                 for term in all_terms[:total_items]:
                     if "parents" in term["_links"]:
                         all_parents_tasks.append(get_term_parents(
                             session, term["_links"]["parents"]["href"]))
                     else:
+                        # if the term has no parent, we insert just a placeholder
+                        # this allows us to use the same index for terms and their parents
+                        # and check if parent exists/is not None later on
                         all_parents_tasks.append(get_none())
-                all_parents_data = await tqdm.gather(*all_parents_tasks)
+
+                all_parents_data = await self.run_with_log("parents", all_parents_tasks)
 
                 # creating all new terms and synonyms
                 create_all_terms_tasks = [
                     create_term_task(term) for term in all_terms]
-                created_terms = await tqdm.gather(*create_all_terms_tasks)
+                created_terms = await self.run_with_log("Save terms and synonyms", create_all_terms_tasks)
                 terms_mapping = {term.id: term for term in created_terms}
-    
+
                 # creating ontology relationships
                 create_all_ontologies_tasks = [
                     create_ontology_task(term, all_parents_data[i], terms_mapping) for i, term in enumerate(created_terms)
                 ]
-                await tqdm.gather(*create_all_ontologies_tasks)
+                await self.run_with_log("create ontology rels", create_all_ontologies_tasks)
 
         asyncio.run(main())
