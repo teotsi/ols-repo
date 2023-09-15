@@ -11,7 +11,10 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -75,11 +78,20 @@ WSGI_APPLICATION = 'ols_repo.wsgi.application'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        # "OPTIONS": {
+        #     "service": "api",
+        #     "passfile": ".pgpass",
+        # },
+        "NAME":os.getenv("NAME"),
+        "USER": os.getenv("DB_USER"),
+        "PASSWORD":os.getenv("PASSWORD"),
+        "HOST":os.getenv("HOST"),
+        "PORT":os.getenv("PORT")
     }
 }
+
 
 
 # Password validation
@@ -122,3 +134,5 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+APPEND_SLASH=True
