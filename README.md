@@ -71,7 +71,7 @@ And you're all set!
 
 ### Frontend
 
-TODO
+The Frontend setup guide can be found under [frontend/terms-table/README.md](frontend/terms-table/README.md).
 
 ## Insert data
 

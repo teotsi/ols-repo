@@ -2,6 +2,36 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## Setup instructions
+
+Ensure you're using a sufficiently recent Node.js version. This was tested successfully with Node.js 16.3.0.
+
+The first step you'll need to take is to install any dependencies. NPM example:
+
+```
+npm i
+```
+
+If you're running this alongside `backend/ols_repo` on your local machine, everything should be ready to go and you can try the `npm start` script from below.
+
+If you edit the port or host that either the backend or the frontend are running on, you will need to take two steps:
+
+1. If you edited the backend port/host, rename the `.env.default` inside of `frontend/terms-table` to `.env` and set the `REACT_APP_DOMAIN` to your actual one. This is the domain and port that the **backend server** is running on. Default is `http://localhost:8000`.
+
+```
+REACT_APP_DOMAIN=http://localhost:8000
+```
+
+2. If you edited the frontend port/host, then you need to update the CORS policy of the backend. This means you need to go to `backend/ols_repo/ols_repo/settings.py` and set CORS domains to allow your new domain as well.
+
+By default `http://localhost:3000` is whitelisted.
+
+```
+CORS_ALLOWED_ORIGINS = [
+"http://localhost:8000",
+"http://localhost:3000"
+]
+```
 ## Available Scripts
 
 In the project directory, you can run:
