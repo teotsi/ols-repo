@@ -37,7 +37,7 @@ pip install -r requirements.txt
 
 Next up, we need to configure our database. This project uses `postgres` as its DBMS, so go ahead and install it on your system, while also creating a database for the project.
 
-After you've done that, you can rename rename the included `.env.default` file to `.env`, and configure it with the DB credentials required.
+After you've done that, you can rename the included `.env.default` file to `.env`, and configure it with the DB credentials required.
 
 ```
 cp .env.default .env
@@ -126,7 +126,13 @@ GET /terms?page=1
             ]
         },
       ...
-    ]
+    ],
+    "pagination": {
+      "current": 1,
+      "pages": 2007,
+      "size": 20,
+      "total": 40134
+    }
   }
 
 ```
@@ -164,12 +170,6 @@ Response:
       "parents": [
           "FAKE-0002"
       ]
-  },
-  "pagination": {
-      "current": 1,
-      "pages": 2007,
-      "size": 20,
-      "total": 40134
   }
 }
 ```
