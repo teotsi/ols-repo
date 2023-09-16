@@ -77,7 +77,9 @@ The Frontend setup guide can be found under [frontend/terms-table/README.md](fro
 
 You can insert data from https://www.ebi.ac.uk/ols/api/ontologies/efo/terms using the `addterms` management command.
 
-You can specify an upper limit of terms to add. Keep in mind that if you choose to do so, certain relationships won't be generated, as some parent nodes might not have been fetched at first.
+You can specify an upper limit of terms to add. Keep in mind that if you choose to do so, certain relationships won't be generated, as some parent nodes might not have been fetched at first. 
+
+Also, loading all 40134 terms takes time. Fetching everything takes about a minute, but storing everything in the DB and creating the necessary relationships takes time as well (5 to 10 minutes depending on your system).
 
 Examples:
 
@@ -161,6 +163,12 @@ Response:
       "parents": [
           "FAKE-0002"
       ]
+  },
+  "pagination": {
+      "current": 1,
+      "pages": 2007,
+      "size": 20,
+      "total": 40134
   }
 }
 ```

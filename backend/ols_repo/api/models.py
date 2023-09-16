@@ -4,7 +4,7 @@ from random import randint
 
 
 class Synonym (models.Model):
-    label = models.CharField(max_length=256, unique=True)
+    label = models.TextField(unique=True)
 
     def __str__(self):
         return self.label

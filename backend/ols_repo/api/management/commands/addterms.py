@@ -41,8 +41,9 @@ async def create_term_task(term):
         label=term["label"], description="".join(term["description"]), id=term["short_form"])
     for synonym in term["synonyms"]:
         try:
-            new_synonym = await new_term.synonyms.acreate(  # creating and saving each synonym
-                label=synonym)
+            # saving each synonym
+            synonym_query_result = await Synonym.objects.aget_or_create(label=synonym)
+            await new_term.synonyms.aadd(synonym_query_result[0])
         except:
             pass
     return new_term
@@ -56,7 +57,7 @@ async def create_ontology_task(term, parents, mapping):
         for parent in parents["_embedded"]["terms"]:
             try:
                 new_ontology_relationship = await term.parents.aadd(mapping[parent["short_form"]])
-            except Exception as e:
+            except:
                 pass
 
 
@@ -68,7 +69,7 @@ async def get_none():
 
 
 class Command(BaseCommand):
-    help = "Fetches terms from OLS and populates the DB"
+    help = "Fetches terms from the OLS API and populates the DB"
 
     async def run_with_log(self, label, tasks):
         """
