@@ -1,9 +1,10 @@
 import TermTable from "./components/TermTable";
+import ErrorMessage from "./components/ErrorMessage";
 import useTerms from "./hooks/useTerms";
 import "./App.css";
 
 function App() {
-  const [pageData, setPageData, data, fetching] = useTerms();
+  const { pageData, setPageData, data, fetching, error } = useTerms();
 
   const handlePageChange = (pagination) => {
     setPageData(pagination);
@@ -19,6 +20,7 @@ function App() {
             pageData={pageData}
           />
         </div>
+        {error && <ErrorMessage error={error} />}
       </div>
     </div>
   );

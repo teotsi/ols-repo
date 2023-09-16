@@ -1,12 +1,12 @@
 .App {
   display: flex;
   justify-content: center;
-  flex-direction: column;
 }
 
 .centered {
   display: flex;
   justify-content: center;
+  flex-direction: column;
 }
 
 .table-wrapper {
@@ -16,4 +16,14 @@
 .centered-text {
   color: #353b3b;
   text-align: center;
+}
+
+.error-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.list {
+  width: 40vw;
 }
