@@ -53,9 +53,10 @@ HOST=localhost
 PORT=5432
 ```
 
-Once you've done that, you can run the following command:
+Once you've done that, you can run the following commands:
 
 ```
+python3 manage.py makemigrations
 python3 manage.py migrate
 ```
 

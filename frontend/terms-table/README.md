@@ -9,6 +9,7 @@ Ensure you're using a sufficiently recent Node.js version. This was tested succe
 The first step you'll need to take is to install any dependencies. NPM example:
 
 ```
+cd frontend/terms-table
 npm i
 ```
 
@@ -17,6 +18,9 @@ If you're running this alongside `backend/ols_repo` on your local machine, every
 If you edit the port or host that either the backend or the frontend are running on, you will need to take two steps:
 
 1. If you edited the backend port/host, rename the `.env.default` inside of `frontend/terms-table` to `.env` and set the `REACT_APP_DOMAIN` to your actual one. This is the domain and port that the **backend server** is running on. Default is `http://localhost:8000`.
+```
+cp .env.default .env
+```
 
 ```
 REACT_APP_DOMAIN=http://localhost:8000
